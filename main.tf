@@ -36,7 +36,7 @@ resource "aws_iam_policy" "policy_one" {
         {
             Effect  = "Allow",
             Action  = "logs:CreateLogGroup",
-            Resource = "arn:aws:logs:ap-southeast-2::*"
+            Resource = "arn:aws:logs:ap-southeast-2:${var.aws_acc_id}:*"
         },
         {
             Effect = "Allow",
@@ -45,7 +45,7 @@ resource "aws_iam_policy" "policy_one" {
                 "logs:PutLogEvents"
             ],
             Resource = [
-                "arn:aws:logs:ap-southeast-2::log-group:/aws/lambda/${var.lambda_logstream_name}:*"
+                "arn:aws:logs:ap-southeast-2:${var.aws_acc_id}:log-group:/aws/lambda/${var.lambda_logstream_name}:*"
             ]
         }
     ]
