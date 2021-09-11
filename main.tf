@@ -8,7 +8,7 @@ provider "aws" {
 
 resource "aws_iam_role" "iam_for_test_lambda" {
   name = "iam_for_test_lambda"
-
+  managed_policy_arns = [aws_iam_policy.policy_one.arn]
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -24,6 +24,33 @@ resource "aws_iam_role" "iam_for_test_lambda" {
   ]
 }
 EOF
+}
+
+resource "aws_iam_policy" "policy_one" {
+  name = "policy-618033"
+
+  policy = jsonencode(
+  {
+    Version= "2012-10-17",
+    Statement = [
+        {
+            Effect  = "Allow",
+            Action  = "logs:CreateLogGroup",
+            Resource = "arn:aws:logs:ap-southeast-2::*"
+        },
+        {
+            Effect = "Allow",
+            Action = [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            Resource = [
+                "arn:aws:logs:ap-southeast-2::log-group:/aws/lambda/${var.lambda_logstream_name}:*"
+            ]
+        }
+    ]
+    })
+
 }
 
 resource "aws_lambda_function" "test_lambda" {
@@ -46,7 +73,8 @@ resource "aws_lambda_permission" "test_apigw_lambda" {
 
   # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
   # source_arn = "arn:aws:execute-api:${var.myregion}:${var.accountId}:${aws_api_gateway_rest_api.api.id}/*/${aws_api_gateway_method.method.http_method}${aws_api_gateway_resource.resource.path}"
-  source_arn = "arn:aws:execute-api:${var.aws_region}::${aws_api_gateway_rest_api.test_api.id}/*/${aws_api_gateway_method.method.http_method}${aws_api_gateway_resource.default.path}"
+  # source_arn = "arn:aws:execute-api:${var.aws_region}::${aws_api_gateway_rest_api.test_api.id}/*/*/*"
+  source_arn = "arn:aws:execute-api:${var.aws_region}:${var.aws_acc_id}:${aws_api_gateway_rest_api.test_api.id}/*/*/*"
 }
 
 
